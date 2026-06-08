@@ -492,6 +492,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 9091567715508526735}
+  - component: {fileID: 5398186925386439617}
   m_Layer: 0
   m_Name: CharacterModel
   m_TagString: Untagged
@@ -516,6 +517,27 @@ Transform:
   - {fileID: 7756584132002599908}
   m_Father: {fileID: 8866764972245796795}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!95 &5398186925386439617
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3859119507036580251}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 22ff8106886fcf74ca4ba98da5981549, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &3991121124205225694
 GameObject:
   m_ObjectHideFlags: 0
@@ -623,6 +645,7 @@ GameObject:
   - component: {fileID: 1348294998066086436}
   - component: {fileID: 3434801108867804344}
   - component: {fileID: 2514091399712249300}
+  - component: {fileID: -4416012943644402660}
   m_Layer: 0
   m_Name: Zombie
   m_TagString: Enemy
@@ -709,6 +732,27 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 3
+--- !u!95 &-4416012943644402660
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4677525607205007795}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 22ff8106886fcf74ca4ba98da5981549, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &4993997064075544989
 GameObject:
   m_ObjectHideFlags: 0
