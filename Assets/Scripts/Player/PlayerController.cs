@@ -1,55 +1,59 @@
 using UnityEngine;
 
-// Script principal del jugador.
-// El jugador avanza solo hacia adelante sin parar, se puede mover entre 3 carriles
-// con A y D, saltar con espacio y disparar con la tecla F.
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(Collider))]
+[RequireComponent(typeof(Animator))]
 public class PlayerController : MonoBehaviour
 {
     [Header("Movimiento hacia adelante")]
-    [SerializeField] private float forwardSpeed = 12f; // velocidad fija hacia adelante (Z)
+    [SerializeField] private float forwardSpeed = 12f;
 
     [Header("Carriles")]
-    [SerializeField] private float laneDistance = 2.5f;   // separacion entre carriles
-    [SerializeField] private float laneChangeSpeed = 15f; // que tan rapido se cambia de carril
+    [SerializeField] private float laneDistance = 2.5f;
+    [SerializeField] private float laneChangeSpeed = 15f;
 
-    // carril actual: -1 izquierda, 0 centro, 1 derecha
     private int currentLane = 0;
 
     [Header("Salto")]
-    [SerializeField] private float jumpForce = 9f;       // fuerza del salto
-    [SerializeField] private float customGravity = -25f; // gravedad propia (cae mas rapido, se siente arcade)
+    [SerializeField] private float jumpForce = 9f;
+    [SerializeField] private float customGravity = -25f;
 
-    private bool isGrounded = true; // si esta tocando el piso
+    private bool isGrounded = true;
 
     [Header("Disparo")]
-    public GameObject projectilePrefab;  // la bala que dispara
-    public Transform firePoint;          // de donde sale la bala
-    [SerializeField] private float fireCooldown = 0.5f; // tiempo minimo entre disparos
+    public GameObject projectilePrefab;
+    public Transform firePoint;
+    [SerializeField] private float fireCooldown = 0.5f;
 
-    private float nextFireTime = 0f; // cuando va a poder volver a disparar
+    private float nextFireTime = 0f;
 
     [Header("Estado")]
-    [SerializeField] private bool isAlive = true; // si esta vivo
+    [SerializeField] private bool isAlive = true;
 
-    private int coinCount = 0; // monedas que lleva
+    private int coinCount = 0;
     private Rigidbody rb;
-    private float targetX = 0f; // X a la que se quiere mover segun el carril
+    private float targetX = 0f;
+
+  
+    private Animator animator;
+   
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
-        // que no se de vuelta al chocar
         rb.constraints = RigidbodyConstraints.FreezeRotation;
-        rb.useGravity = false; // usamos nuestra propia gravedad
+        rb.useGravity = false;
+
+       
+        animator = GetComponent<Animator>();
+        animator.SetBool("isWalking", true);
+       
     }
 
     private void Update()
     {
         if (!isAlive) return;
 
-        // revisamos las teclas cada frame
         HandleLaneInput();
         HandleJumpInput();
         HandleShootInput();
@@ -59,22 +63,16 @@ public class PlayerController : MonoBehaviour
     {
         if (!isAlive) return;
 
-        // 1) lo empujamos siempre hacia adelante
         Vector3 velocity = rb.velocity;
         velocity.z = forwardSpeed;
-
-        // 2) le aplicamos la gravedad
         velocity.y += customGravity * Time.fixedDeltaTime;
-
         rb.velocity = velocity;
 
-        // 3) lo movemos de a poco hacia el carril que toca (eje X)
         Vector3 pos = rb.position;
         pos.x = Mathf.Lerp(pos.x, targetX, laneChangeSpeed * Time.fixedDeltaTime);
         rb.MovePosition(new Vector3(pos.x, rb.position.y, rb.position.z));
     }
 
-    // A = izquierda, D = derecha
     private void HandleLaneInput()
     {
         if (Input.GetKeyDown(KeyCode.A) && currentLane > -1)
@@ -89,7 +87,6 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    // espacio para saltar (solo si esta en el piso)
     private void HandleJumpInput()
     {
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
@@ -99,12 +96,10 @@ public class PlayerController : MonoBehaviour
             rb.velocity = v;
             isGrounded = false;
 
-            // sonido de salto
             if (AudioManager.Instance != null) AudioManager.Instance.PlayJumpSFX();
         }
     }
 
-    // F para disparar, respetando el tiempo de espera
     private void HandleShootInput()
     {
         if (Input.GetKeyDown(KeyCode.F) && Time.time >= nextFireTime)
@@ -114,7 +109,6 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    // crea la bala
     private void Shoot()
     {
         if (projectilePrefab == null)
@@ -123,7 +117,6 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        // si hay un firePoint usamos ese, si no, disparamos desde el jugador
         Vector3 spawnPos;
         Quaternion spawnRot;
         if (firePoint != null)
@@ -134,18 +127,16 @@ public class PlayerController : MonoBehaviour
         else
         {
             spawnPos = transform.position + transform.forward * 0.8f + Vector3.up * 1.2f;
-            spawnRot = Quaternion.LookRotation(Vector3.forward); // dispara hacia adelante
+            spawnRot = Quaternion.LookRotation(Vector3.forward);
         }
 
         Instantiate(projectilePrefab, spawnPos, spawnRot);
 
-        // sonido del disparo
         if (AudioManager.Instance != null) AudioManager.Instance.PlayShootSFX();
     }
 
     private void OnCollisionEnter(Collision collision)
     {
-        // si chocamos algo desde arriba, quiere decir que tocamos el piso
         foreach (ContactPoint contact in collision.contacts)
         {
             if (contact.normal.y > 0.5f)
@@ -155,7 +146,6 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        // si chocamos un zombie o un obstaculo, perdemos
         if (collision.gameObject.CompareTag("Enemy") || collision.gameObject.CompareTag("Obstacle"))
         {
             Die();
@@ -164,7 +154,6 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        // si pasamos por una moneda la juntamos
         if (other.CompareTag("Coin"))
         {
             AddCoin(1);
@@ -172,38 +161,32 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    // suma monedas al jugador
     public void AddCoin(int amount)
     {
         if (amount <= 0) return;
         coinCount += amount;
     }
 
-    // devuelve cuantas monedas lleva
     public int GetCoinCount()
     {
         return coinCount;
     }
 
-    // se llama cuando el jugador muere
     private void Die()
     {
         if (!isAlive) return;
         isAlive = false;
 
-        // avisamos al GameManager para que muestre el menu de derrota
+       
+        animator.SetBool("isWalking", false);
+        
+
         if (GameManager.Instance != null)
-        {
             GameManager.Instance.GameOver();
-        }
         else
-        {
-            // por las dudas, si no hay GameManager reiniciamos directo
             RestartGame();
-        }
     }
 
-    // reinicia la partida volviendo a cargar la escena
     public void RestartGame()
     {
         UnityEngine.SceneManagement.SceneManager.LoadScene(
@@ -211,7 +194,6 @@ public class PlayerController : MonoBehaviour
         );
     }
 
-    // dice si el jugador sigue vivo
     public bool IsAlive()
     {
         return isAlive;
